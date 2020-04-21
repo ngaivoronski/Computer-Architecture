@@ -16,10 +16,13 @@ class CPU:
         # program on / off switch
         self.running = True
 
-        # variable names for function addresses
-        self.LDI = 0b10000010
-        self.PRN = 0b01000111
-        self.HLT = 0b00000001
+        # map variable names to function addresses
+        self.command = {
+            0b10000010: "LDI",
+            0b01000111: "PRN",
+            0b00000001: "HLT",
+            0b10100010: "MUL"
+        }
     
     def ram_read(self, address):
         return self.ram[address]
@@ -28,34 +31,43 @@ class CPU:
         self.ram[address] = value
         return True
 
-    def load(self):
+    def load(self, file):
         """Load a program into memory."""
 
         address = 0
 
-        # For now, we've just hardcoded a program:
+        # open the file
+        with open(file) as f:
+            program = f.readlines()
 
-        program = [
-            # From print8.ls8
-            0b10000010, # LDI R0,8
-            0b00000000,
-            0b00001000,
-            0b01000111, # PRN R0
-            0b00000000,
-            0b00000001, # HLT
-        ]
-
+        # clean out the comments and /n symbols
         for instruction in program:
-            self.ram[address] = instruction
-            address += 1
+            if "#" in instruction:
+                instruction = instruction.split('#')[0]
+            elif " #" in instruction:
+                instruction = instruction.split(' #')[0]
+            elif "\n" in instruction:
+                instruction = instruction.split("\n")[0]
 
+            # convert to binary and add the cleaned-up instructions into ram
+            if len(instruction) > 0:
+                instruction = int(instruction, 2)
+                self.ram[address] = instruction
+                address += 1
+        
+        # print(f"conversion complete, ram is {self.ram}")
 
     def alu(self, op, reg_a, reg_b):
         """ALU operations."""
 
         if op == "ADD":
             self.reg[reg_a] += self.reg[reg_b]
-        #elif op == "SUB": etc
+        elif op == "SUB":
+            self.reg[reg_a] -= self.reg[reg_b]
+        elif op == "MUL":
+            self.reg[reg_a] *= self.reg[reg_b]
+        elif op == "DIV":
+            self.reg[reg_a] /= self.reg[reg_b]
         else:
             raise Exception("Unsupported ALU operation")
 
@@ -82,18 +94,21 @@ class CPU:
     def run(self):
         """Run the CPU."""
         while self.running:
-            ir = self.ram_read(self.pc)
+            ir = self.command[self.ram_read(self.pc)] # get the binary address of pc and convert it to the command
             operand_a = self.ram_read(self.pc + 1)
             operand_b = self.ram_read(self.pc + 2)
 
             # stop the program
-            if ir == self.HLT:
+            if ir == "HLT":
                 self.running = False
             # set a register A to a value B
-            elif ir == self.LDI:
+            elif ir == "LDI":
                 self.reg[operand_a] = operand_b
                 self.pc += 3
             # print A
-            elif ir == self.PRN:
+            elif ir == "PRN":
                 print(self.reg[operand_a])
                 self.pc += 2
+            elif ir == "MUL":
+                self.alu("MUL", operand_a, operand_b)
+                self.pc += 3
