@@ -11,6 +11,8 @@ class CPU:
         self.ram = [0] * 256
         # 8 bytes of general memory
         self.reg = [0] * 8
+        # create the stack pointer at reg[7] and set value to F4 hex
+        self.reg[7] = 0xf4
         # program counter value
         self.pc = 0
         # program on / off switch
@@ -21,7 +23,9 @@ class CPU:
             0b10000010: "LDI",
             0b01000111: "PRN",
             0b00000001: "HLT",
-            0b10100010: "MUL"
+            0b10100010: "MUL",
+            0b01000101: "PUSH",
+            0b01000110: "POP",
         }
     
     def ram_read(self, address):
@@ -112,3 +116,19 @@ class CPU:
             elif ir == "MUL":
                 self.alu("MUL", operand_a, operand_b)
                 self.pc += 3
+            elif ir == "PUSH":
+                # decrement the stack pointer
+                self.reg[7] -= 1
+                # get address pointed to by SP
+                sp = self.reg[7]
+                # copy the value of the given register to that address
+                self.ram[sp] = self.reg[operand_a]
+                self.pc += 2
+            elif ir == "POP":
+                # get address pointed to by SP
+                sp = self.reg[7]
+                # copy the value of the given register to that address
+                self.reg[operand_a] = self.ram[sp]
+                # increment sp
+                self.reg[7] += 1
+                self.pc += 2
