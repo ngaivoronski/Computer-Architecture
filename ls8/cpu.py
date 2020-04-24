@@ -36,6 +36,13 @@ class CPU:
             0b01010100: "JMP",
             0b01010101: "JEQ",
             0b01010110: "JNE",
+            0b10101000: "AND",
+            0b10101010: "OR",
+            0b10101011: "XOR",
+            0b01101001: "NOT",
+            0b10101100: "SHL",
+            0b10101101: "SHR",
+            0b10100100: "MOD"
         }
     
     def ram_read(self, address):
@@ -91,6 +98,21 @@ class CPU:
                 self.reg[5] = 0b00000010
             elif self.reg[reg_a] == self.reg[reg_b]:
                 self.reg[5] = 0b00000001
+        # bitwise operations
+        elif op == "AND":
+            self.reg[reg_a] = self.reg[reg_a] & self.reg[reg_b]
+        elif op == "OR":
+            self.reg[reg_a] = self.reg[reg_a] | self.reg[reg_b]
+        elif op == "XOR":
+            self.reg[reg_a] = self.reg[reg_a] ^ self.reg[reg_b]
+        elif op == "NOT":
+            self.reg[reg_a] = ~self.reg[reg_a]
+        elif op == "SHL":
+            self.reg[reg_a] = self.reg[reg_a] << self.reg[reg_b]
+        elif op == "SHR":
+            self.reg[reg_a] = self.reg[reg_a] >> self.reg[reg_b]
+        elif op == "MOD":
+            self.reg[reg_a] = self.reg[reg_a] % self.reg[reg_b]
         else:
             raise Exception("Unsupported ALU operation")
 
@@ -186,3 +208,25 @@ class CPU:
                     self.pc += 2
                 else:
                     self.pc = self.reg[operand_a] # jump if not equal
+            # bitwise operations
+            elif ir == "AND":
+                self.alu("AND", operand_a, operand_b)
+                self.pc += 3
+            elif ir == "OR":
+                self.alu("OR", operand_a, operand_b)
+                self.pc += 3
+            elif ir == "XOR":
+                self.alu("XOR", operand_a, operand_b)
+                self.pc += 3
+            elif ir == "NOT":
+                self.alu("NOT", operand_a)
+                self.pc += 2 
+            elif ir == "SHL":
+                self.alu("SHL", operand_a, operand_b)
+                self.pc += 3
+            elif ir == "SHR":
+                self.alu("SHR", operand_a, operand_b)
+                self.pc += 3
+            elif ir == "MOD":
+                self.alu("MOD", operand_a, operand_b)
+                self.pc += 3
