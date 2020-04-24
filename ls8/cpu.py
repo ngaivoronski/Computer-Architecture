@@ -9,7 +9,7 @@ class CPU:
         """Construct a new CPU."""
         # 256 bytes of RAM
         self.ram = [0] * 256
-        # 8 bytes of general memory
+        # 8 bytes of general memory - register
         self.reg = [0] * 8
         # create the stack pointer at reg[7] and set value to F4 hex
         self.reg[7] = 0xf4
@@ -26,6 +26,9 @@ class CPU:
             0b10100010: "MUL",
             0b01000101: "PUSH",
             0b01000110: "POP",
+            0b01010000: "CALL",
+            0b00010001: "RET",
+            0b10100000: "ADD",
         }
     
     def ram_read(self, address):
@@ -116,6 +119,9 @@ class CPU:
             elif ir == "MUL":
                 self.alu("MUL", operand_a, operand_b)
                 self.pc += 3
+            elif ir == "ADD":
+                self.alu("ADD", operand_a, operand_b)
+                self.pc += 3
             elif ir == "PUSH":
                 # decrement the stack pointer
                 self.reg[7] -= 1
@@ -132,3 +138,20 @@ class CPU:
                 # increment sp
                 self.reg[7] += 1
                 self.pc += 2
+            elif ir == "CALL":
+                # decrement the stack pointer
+                self.reg[7] -= 1
+                # get address pointed to by SP
+                sp = self.reg[7]
+                # copy the value of the given register to that address
+                self.ram[sp] = self.pc + 2
+                # jump to the given point in memory
+                self.pc = self.reg[operand_a]
+            elif ir == "RET":
+                # get address pointed to by SP
+                sp = self.reg[7]
+                # put pc to that address
+                self.pc = self.ram_read(sp)
+                # increment sp (pop the stack)
+                self.reg[7] += 1
+
