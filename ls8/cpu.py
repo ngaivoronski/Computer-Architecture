@@ -141,6 +141,7 @@ class CPU:
         while self.running:
             # instruction register
             ir = self.command[self.ram_read(self.pc)] # get the binary address of pc and convert it to the command
+            # print(ir)
             operand_a = self.ram_read(self.pc + 1)
             operand_b = self.ram_read(self.pc + 2)
 
