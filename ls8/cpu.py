@@ -13,9 +13,9 @@ class CPU:
         self.reg = [0] * 8
         # create the stack pointer at reg[7] and set value to F4 hex
         self.reg[7] = 0xf4
-        # create a flag holder at reg[5] and set it to 0b00000000
+        # create a flag holder at reg[4] and set it to 0b00000000
         # last three binary digits will be L G E in that order
-        self.reg[5] = 0b00000000
+        self.reg[4] = 0b00000000
         # program counter value
         self.pc = 0
         # program on / off switch
@@ -94,11 +94,11 @@ class CPU:
         elif op == "CMP":
             # flags are stored 0b00000LGE - in that order
             if self.reg[reg_a] < self.reg[reg_b]:
-                self.reg[5] = 0b00000100
+                self.reg[4] = 0b00000100
             elif self.reg[reg_a] > self.reg[reg_b]:
-                self.reg[5] = 0b00000010
+                self.reg[4] = 0b00000010
             elif self.reg[reg_a] == self.reg[reg_b]:
-                self.reg[5] = 0b00000001
+                self.reg[4] = 0b00000001
         # bitwise operations
         elif op == "AND":
             self.reg[reg_a] = self.reg[reg_a] & self.reg[reg_b]
@@ -204,12 +204,12 @@ class CPU:
             elif ir == "JMP":
                 self.pc = self.reg[operand_a]
             elif ir == "JEQ":
-                if self.reg[5] == 0b00000001:
+                if self.reg[4] == 0b00000001:
                     self.pc = self.reg[operand_a] # jump if equal
                 else:
                     self.pc += 2
             elif ir == "JNE":
-                if self.reg[5] == 0b00000001:
+                if self.reg[4] == 0b00000001:
                     self.pc += 2
                 else:
                     self.pc = self.reg[operand_a] # jump if not equal
