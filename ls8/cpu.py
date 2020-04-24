@@ -42,7 +42,8 @@ class CPU:
             0b01101001: "NOT",
             0b10101100: "SHL",
             0b10101101: "SHR",
-            0b10100100: "MOD"
+            0b10100100: "MOD",
+            0b00011111: "ADDI"
         }
     
     def ram_read(self, address):
@@ -113,6 +114,9 @@ class CPU:
             self.reg[reg_a] = self.reg[reg_a] >> self.reg[reg_b]
         elif op == "MOD":
             self.reg[reg_a] = self.reg[reg_a] % self.reg[reg_b]
+        # ADDI
+        elif op == "ADDI":
+            self.reg[reg_a] = self.reg[reg_a] + reg_b
         else:
             raise Exception("Unsupported ALU operation")
 
@@ -230,4 +234,7 @@ class CPU:
                 self.pc += 3
             elif ir == "MOD":
                 self.alu("MOD", operand_a, operand_b)
+                self.pc += 3
+            elif ir == "ADDI":
+                self.alu("ADDI", operand_a, operand_b)
                 self.pc += 3

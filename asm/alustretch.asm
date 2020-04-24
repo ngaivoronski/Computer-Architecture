@@ -54,4 +54,9 @@ LDI R1,4
 MOD R0,R1   ; Should 7 mod 4
 PRN R0      ; Prints 3
 
+; TEST ADDI
+LDI R0,7
+;ADDI R0,4   ; Should add 4 to R0
+PRN R0      ; Prints 11
+
 HLT
